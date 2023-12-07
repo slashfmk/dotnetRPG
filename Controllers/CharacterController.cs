@@ -1,35 +1,42 @@
 global using dotnetRPG.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using dotnetRPG.Dtos;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace dotnetRPG.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class CharacterController : ControllerBase
+    public class CharacterController : BaseApiController
     {
+        private readonly ICharacterService _characterService;
 
-        private static List<Character> charcters = new List<Character> {
-        new Character {Name = "Yannick"},
-        new Character()
-        };
-
+        public CharacterController(ICharacterService characterService)
+        {
+            _characterService = characterService;
+        }
 
         [HttpGet("GetAll")]
-        public ActionResult<List<Character>> Get()
+        public async Task<ActionResult<List<Character>>> GetAll()
         {
-            return Ok(charcters);
+            return Ok(await _characterService.GetAllCharacters());
         }
 
 
-        [HttpGet("GetCharacter")]
-        public ActionResult<Character> GetCharacter()
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Character>> GetById(int id)
         {
+            return Ok(await _characterService.GetCharacterById(id));
+        }
 
-            return Ok(charcters.ElementAt(0));
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Character>> DeleteCharacter(int id)
+        {
+            return Ok(await _characterService.DeleteCharacter(id));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Character>> Create(CharacterDto newCharacter)
+        {
+            return Ok(await _characterService.AddCharacter(newCharacter));
         }
     }
 }
