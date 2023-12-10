@@ -1,42 +1,42 @@
+using AutoMapper;
+using dotnetRPG.Data;
 using dotnetRPG.Dtos;
+
 
 namespace dotnetRPG.Services.CharacterService;
 
 public class CharacterService : ICharacterService
 {
-   
-    private static List<Character> _characters = new List<Character>
+
+    // Members
+    private readonly IMapper _mapper;
+    private readonly DataContext _dataContext;
+
+
+    public CharacterService(IMapper mapper, DataContext dataContext)
     {
-        new Character
-        {
-            Id = 2, Name = "motaro", Class = RpgClass.Knight, Defense = 12, Intelligence = 5, Strength = 10,
-            HitPoints = 40
-        },
-        new Character
-        {
-            Id = 3, Class = RpgClass.Cleric, Defense = 9, Intelligence = 12, Name = "Jaden", Strength = 22,
-            HitPoints = 43
-        }
-    };
+        _mapper = mapper;
+        _dataContext = dataContext;
+    }
 
-
-    public async Task<ServiceResponse<List<Character>>> GetAllCharacters()
+    public async Task<ServiceResponse<List<GetCharacterDto>>> GetAllCharacters()
     {
-        var response = new ServiceResponse<List<Character>>();
-
-        response.Data = _characters.ToList();
-        response.Message = $" {_characters.Count()} users found";
-        response.Success = true;
+        var response = new ServiceResponse<List<GetCharacterDto>>();
+        var users = await _dataContext.Characters.ToListAsync();
         
-        return  response;
+        response.Data = _mapper.Map<List<GetCharacterDto>>(users);
+        response.Message = $" {users.Count()} users found";
+        response.Success = true;
+
+        return response;
     }
 
     // Get character by Id
-    public async Task<ServiceResponse<Character>> GetCharacterById(int id)
+    public async Task<ServiceResponse<GetCharacterDto>> GetCharacterById(int id)
     {
-        var foundCharacter = _characters.FirstOrDefault(x => x.Id == id);
-        var response = new ServiceResponse<Character>();
-        
+        var foundCharacter = await _dataContext.Characters.FirstOrDefaultAsync(x => x.Id == id);
+        var response = new ServiceResponse<GetCharacterDto>();
+
         if (foundCharacter is null)
         {
             response.Data = null;
@@ -45,17 +45,17 @@ public class CharacterService : ICharacterService
         }
 
 
-        response.Data = foundCharacter;
+        response.Data = _mapper.Map<GetCharacterDto>(foundCharacter);
 
         return response;
     }
 
     // Delete character
-    public async Task<ServiceResponse<Character>> DeleteCharacter(int id)
+    public async Task<ServiceResponse<GetCharacterDto>> DeleteCharacter(int id)
     {
-        var found = _characters.FirstOrDefault(c => c.Id == id);
+        var found = await _dataContext.Characters.FirstOrDefaultAsync(c => c.Id == id);
 
-        var response = new ServiceResponse<Character>();
+        var response = new ServiceResponse<GetCharacterDto>();
 
         if (found is null)
         {
@@ -64,36 +64,37 @@ public class CharacterService : ICharacterService
             response.Success = false;
         }
 
-        _characters.Remove(found);
-        
-        response.Data = found;
-        
+        _dataContext.Characters.Remove(found);
+
+        _dataContext.SaveChanges();
+
+        response.Data = _mapper.Map<GetCharacterDto>(found);
+
         return response;
     }
 
     // Add new character
-    public async Task<ServiceResponse<Character>> AddCharacter(CharacterDto newCharacter)
+    public async Task<ServiceResponse<GetCharacterDto>> AddCharacter(AddCharacterDto newAddCharacter)
     {
-        var idCount = _characters.Count + 1;
 
-        var response = new ServiceResponse<Character>();
-        
-        var newToInsert = new Character
+        var response = new ServiceResponse<GetCharacterDto>();
+
+        try
         {
-            Id = idCount,
-            Class = newCharacter.Class,
-            Defense = newCharacter.Defense,
-            Name = newCharacter.Name,
-            Intelligence = newCharacter.Intelligence,
-            HitPoints = newCharacter.HitPoints,
-            Strength = newCharacter.Strength
-        };
+            var characterToSave = _mapper.Map<Character>(newAddCharacter);
+            // characterToSave.Id = _characters.Count + 1;
 
-        _characters.Add(newToInsert);
+            await _dataContext.Characters.AddAsync(characterToSave);
+            _dataContext.SaveChanges();
 
-        response.Data = newToInsert;
-        response.Message = "Character successfully added!";
-
+            response.Data = _mapper.Map<GetCharacterDto>(characterToSave);
+            response.Message = "Character successfully added!";
+        }
+        catch (Exception e)
+        {
+            response.Message = e.Message;
+        }
+        
         return response;
     }
 }
