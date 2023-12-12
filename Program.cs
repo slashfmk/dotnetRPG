@@ -16,6 +16,8 @@ builder.Services.AddDbContext<DataContext>(options  =>
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<ICharacterService, CharacterService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
 builder.Services.AddAutoMapper(typeof(CharacterProfile));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

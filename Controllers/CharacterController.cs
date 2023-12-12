@@ -33,7 +33,7 @@ namespace dotnetRPG.Controllers
             var result = await _characterService.DeleteCharacter(id);
 
             if (!result.Success) return NotFound((result));
-            
+
             return Ok(result);
         }
 

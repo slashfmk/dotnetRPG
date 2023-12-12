@@ -7,7 +7,6 @@ namespace dotnetRPG.Services.CharacterService;
 
 public class CharacterService : ICharacterService
 {
-
     // Members
     private readonly IMapper _mapper;
     private readonly DataContext _dataContext;
@@ -23,7 +22,7 @@ public class CharacterService : ICharacterService
     {
         var response = new ServiceResponse<List<GetCharacterDto>>();
         var users = await _dataContext.Characters.ToListAsync();
-        
+
         response.Data = _mapper.Map<List<GetCharacterDto>>(users);
         response.Message = $" {users.Count()} users found";
         response.Success = true;
@@ -76,7 +75,6 @@ public class CharacterService : ICharacterService
     // Add new character
     public async Task<ServiceResponse<GetCharacterDto>> AddCharacter(AddCharacterDto newAddCharacter)
     {
-
         var response = new ServiceResponse<GetCharacterDto>();
 
         try
@@ -94,7 +92,7 @@ public class CharacterService : ICharacterService
         {
             response.Message = e.Message;
         }
-        
+
         return response;
     }
 }
