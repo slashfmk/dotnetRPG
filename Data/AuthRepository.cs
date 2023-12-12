@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 
 namespace dotnetRPG.Data;
 
@@ -17,7 +16,7 @@ public class AuthRepository : IAuthRepository
 
         try
         {
-            this.CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
 
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
@@ -45,15 +44,48 @@ public class AuthRepository : IAuthRepository
         }
     }
 
+
     // TODO
     public async Task<ServiceResponse<string>> Login(string username, string password)
     {
-        throw new NotImplementedException();
+        var response = new ServiceResponse<string>();
+
+        var foundUser =
+            await _dataContext.Users.FirstOrDefaultAsync(u => u.Username.ToLower().Equals(username.ToLower()));
+        
+        if (foundUser is null)
+        {
+            response.Message = $"User with username ${username} doesn't exist";
+            response.Success = false;
+            return response;
+        }
+
+
+        if (!VerifyPasswordHash(password, foundUser.PasswordHash, foundUser.PasswordSalt))
+        {
+            response.Message = "Invalid Credentials!";
+            response.Success = false;
+            return response;
+        }
+
+        response.Data = $"{foundUser.Id}";
+        response.Message = "Successfully Logged In";
+        response.Success = true;
+        return response;
     }
 
     public async Task<bool> UserExists(string username)
     {
         return await _dataContext.Users.AnyAsync(u => u.Username.ToLower() == username.ToLower());
+    }
+
+    private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+    {
+        using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
+        {
+            var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return computedHash.SequenceEqual((passwordHash));
+        }
     }
 
     private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
