@@ -1,13 +1,19 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.InteropServices.JavaScript;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
 namespace dotnetRPG.Data;
 
 public class AuthRepository : IAuthRepository
 {
     private readonly DataContext _dataContext;
+    private readonly IConfiguration _configuration;
 
-    public AuthRepository(DataContext dataContext)
+    public AuthRepository(DataContext dataContext, IConfiguration configuration)
     {
         _dataContext = dataContext;
+        _configuration = configuration;
     }
 
     public async Task<ServiceResponse<int>> Register(User user, string password)
@@ -21,7 +27,7 @@ public class AuthRepository : IAuthRepository
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
-            if (await this.UserExists(user.Username))
+            if (await UserExists(user.Username))
             {
                 response.Message = $"username {user.Username} has already been taken!";
                 response.Success = false;
@@ -45,17 +51,16 @@ public class AuthRepository : IAuthRepository
     }
 
 
-    // TODO
     public async Task<ServiceResponse<string>> Login(string username, string password)
     {
         var response = new ServiceResponse<string>();
 
         var foundUser =
             await _dataContext.Users.FirstOrDefaultAsync(u => u.Username.ToLower().Equals(username.ToLower()));
-        
+
         if (foundUser is null)
         {
-            response.Message = $"User with username ${username} doesn't exist";
+            response.Message = $"User with username {username} doesn't exist";
             response.Success = false;
             return response;
         }
@@ -68,7 +73,7 @@ public class AuthRepository : IAuthRepository
             return response;
         }
 
-        response.Data = $"{foundUser.Id}";
+        response.Data = $"{CreateToken(foundUser)}";
         response.Message = "Successfully Logged In";
         response.Success = true;
         return response;
@@ -76,7 +81,7 @@ public class AuthRepository : IAuthRepository
 
     public async Task<bool> UserExists(string username)
     {
-        return await _dataContext.Users.AnyAsync(u => u.Username.ToLower() == username.ToLower());
+        return await _dataContext.Users.AnyAsync(u => u.Username.ToLower().Equals(username.ToLower()));
     }
 
     private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
@@ -95,5 +100,36 @@ public class AuthRepository : IAuthRepository
             passwordSalt = hmac.Key;
             passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
         }
+    }
+
+    // TODO 
+    private string CreateToken(User user)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username)
+        };
+
+        // Get the value from the file appsettings
+        var appSettingsToken = _configuration.GetSection("AppSettings:Token").Value;
+
+        if (appSettingsToken is null) throw new Exception("AppToken Token string empty!");
+
+        SymmetricSecurityKey key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes((appSettingsToken)));
+        SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.Now.AddDays(1),
+            SigningCredentials = credentials
+        };
+
+        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+        SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+
+        return tokenHandler.WriteToken(token);
+
     }
 }
