@@ -1,46 +1,47 @@
 global using dotnetRPG.Models;
 using dotnetRPG.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace dotnetRPG.Controllers
+namespace dotnetRPG.Controllers;
+
+[Authorize]
+public class CharacterController : BaseApiController
 {
-    public class CharacterController : BaseApiController
+    private readonly ICharacterService _characterService;
+
+    public CharacterController(ICharacterService characterService)
     {
-        private readonly ICharacterService _characterService;
+        _characterService = characterService;
+    }
 
-        public CharacterController(ICharacterService characterService)
-        {
-            _characterService = characterService;
-        }
-
-        [HttpGet("GetAll")]
-        public async Task<ActionResult<ServiceResponse<List<GetCharacterDto>>>> GetAll()
-        {
-            return Ok(await _characterService.GetAllCharacters());
-        }
+    [HttpGet("GetAll")]
+    public async Task<ActionResult<ServiceResponse<List<GetCharacterDto>>>> GetAll()
+    {
+        return Ok(await _characterService.GetAllCharacters());
+    }
 
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> GetById(int id)
-        {
-            return Ok(await _characterService.GetCharacterById(id));
-        }
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> GetById(int id)
+    {
+        return Ok(await _characterService.GetCharacterById(id));
+    }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> DeleteCharacter(int id)
-        {
-            var result = await _characterService.DeleteCharacter(id);
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> DeleteCharacter(int id)
+    {
+        var result = await _characterService.DeleteCharacter(id);
 
-            if (!result.Success) return NotFound((result));
+        if (!result.Success) return NotFound((result));
 
-            return Ok(result);
-        }
+        return Ok(result);
+    }
 
-        [HttpPost]
-        public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> Create(AddCharacterDto newAddCharacter)
-        {
-            return Ok(await _characterService.AddCharacter(newAddCharacter));
-        }
+    [HttpPost]
+    public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> Create(AddCharacterDto newAddCharacter)
+    {
+        return Ok(await _characterService.AddCharacter(newAddCharacter));
     }
 }

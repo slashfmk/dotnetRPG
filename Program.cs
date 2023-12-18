@@ -1,24 +1,44 @@
-
 global using dotnetRPG.Services.CharacterService;
 global using dotnetRPG.Dtos;
 global using Microsoft.EntityFrameworkCore;
 using dotnetRPG.Data;
 using dotnetRPG.MappingProfile;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddDbContext<DataContext>(options  => 
+// Connection to the DB
+builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 
+/*
+ * Added middlewares by me
+ */
+builder.Services.AddAutoMapper(typeof(CharacterProfile));
 builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
-builder.Services.AddAutoMapper(typeof(CharacterProfile));
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    System.Text.Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value!)),
+                ValidateIssuer = false,
+                ValidateAudience = false
+            };
+        }
+    );
+
+/*
+ * End 
+ */
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -35,6 +55,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+/*
+ * Added for securing endpoints
+ * app.UseAuthentication()
+ * Must be before UseAuthorization
+ */
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
