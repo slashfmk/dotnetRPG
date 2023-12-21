@@ -61,6 +61,7 @@ public class CharacterService : ICharacterService
             response.Data = null;
             response.Message = "Character not existing";
             response.Success = false;
+            return response;
         }
 
         _dataContext.Characters.Remove(found);

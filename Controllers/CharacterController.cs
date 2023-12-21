@@ -23,6 +23,7 @@ public class CharacterController : BaseApiController
     }
 
 
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> GetById(int id)
     {
