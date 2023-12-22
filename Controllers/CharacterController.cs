@@ -16,12 +16,12 @@ public class CharacterController : BaseApiController
         _characterService = characterService;
     }
 
+    [AllowAnonymous]
     [HttpGet("GetAll")]
     public async Task<ActionResult<ServiceResponse<List<GetCharacterDto>>>> GetAll()
     {
         return Ok(await _characterService.GetAllCharacters());
     }
-
 
 
     [HttpGet("{id}")]
