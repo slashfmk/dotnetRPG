@@ -1,4 +1,5 @@
 using AutoMapper;
+using dotnetRPG.Dtos.Character;
 
 namespace dotnetRPG.MappingProfile;
 

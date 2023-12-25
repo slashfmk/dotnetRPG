@@ -1,7 +1,8 @@
 global using dotnetRPG.Models;
-using dotnetRPG.Dtos;
+using dotnetRPG.Dtos.Character;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 
 namespace dotnetRPG.Controllers;
@@ -16,7 +17,6 @@ public class CharacterController : BaseApiController
         _characterService = characterService;
     }
 
-    [AllowAnonymous]
     [HttpGet("GetAll")]
     public async Task<ActionResult<ServiceResponse<List<GetCharacterDto>>>> GetAll()
     {

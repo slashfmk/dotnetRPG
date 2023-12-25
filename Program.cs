@@ -6,6 +6,7 @@ using dotnetRPG.MappingProfile;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Filters;
+using dotnetRPG.Services.WeaponService;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,8 +23,12 @@ builder.Services.AddControllers();
 
 
 builder.Services.AddAutoMapper(typeof(CharacterProfile));
+builder.Services.AddAutoMapper(typeof(WeaponProfile));
 builder.Services.AddScoped<ICharacterService, CharacterService>();
+builder.Services.AddScoped<IWeaponService, WeaponService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+// 
+builder.Services.AddHttpContextAccessor();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

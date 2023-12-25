@@ -1,4 +1,5 @@
 using dotnetRPG.Data;
+using dotnetRPG.Dtos.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dotnetRPG.Controllers;
@@ -24,10 +25,6 @@ public class AuthController : BaseApiController
         {
             return BadRequest(response);
         }
-
-        var coolThings = 123;
-
-        Console.WriteLine(coolThings);
 
         return Ok(response);
     }

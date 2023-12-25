@@ -1,8 +1,8 @@
-namespace dotnetRPG.Dtos;
+namespace dotnetRPG.Dtos.Character;
 
 public class GetCharacterDto
 {
-    
+
     public int Id { get; set; }
     public string? Name { get; set; }
     public int HitPoints { get; set; }
@@ -10,5 +10,5 @@ public class GetCharacterDto
     public int Defense { get; set; }
     public int Intelligence { get; set; }
     public RpgClass Class { get; set; }
-    
+
 }

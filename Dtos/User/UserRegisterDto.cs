@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace dotnetRPG.Dtos;
+namespace dotnetRPG.Dtos.User;
 
 public class UserRegisterDto
 {
