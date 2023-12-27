@@ -18,10 +18,10 @@ namespace dotnetRPG.Controllers
             _weaponService = weaponService; ;
         }
 
-        [HttpDelete]
-        public async Task<ActionResult<ServiceResponse<GetWeaponDto>>> DeleteWeapon()
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ServiceResponse<GetWeaponDto>>> DeleteWeapon(int id)
         {
-            var response = await _weaponService.DeleteWeapon();
+            var response = await _weaponService.DeleteWeapon(id);
 
             if (!response.Success)
             {

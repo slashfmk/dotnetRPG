@@ -9,4 +9,6 @@ public class AddWeaponDto
     [Required]
     [Range(1, 500)]
     public int Damage { get; set; }
+    [Required]
+    public int CharacterId { get; set; }
 }

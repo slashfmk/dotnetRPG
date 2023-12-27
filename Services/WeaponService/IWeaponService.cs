@@ -6,6 +6,6 @@ public interface IWeaponService
 {
 
     public Task<ServiceResponse<GetCharacterDto>> AddWeapon(AddWeaponDto newWeapon);
-    public Task<ServiceResponse<GetWeaponDto>> DeleteWeapon();
+    public Task<ServiceResponse<GetWeaponDto>> DeleteWeapon(int delCharacterId);
 
 }

@@ -21,9 +21,7 @@ builder.Services.AddControllers();
  * Added middlewares by me
  */
 
-
-builder.Services.AddAutoMapper(typeof(CharacterProfile));
-builder.Services.AddAutoMapper(typeof(WeaponProfile));
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<IWeaponService, WeaponService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();

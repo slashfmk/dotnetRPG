@@ -2,6 +2,7 @@
 using dotnetRPG.Data;
 using dotnetRPG.Dtos.Character;
 using dotnetRPG.Dtos.Weapon;
+using Microsoft.Data.SqlClient;
 using System.Security.Claims;
 
 namespace dotnetRPG.Services.WeaponService;
@@ -27,10 +28,12 @@ public class WeaponService : IWeaponService
 
         try
         {
-           
+
             var character = await _dataContext.Characters
                 .FirstOrDefaultAsync(
-                c =>  c.User!.Id == int.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!)
+
+                c => c.Id == newWeapon.CharacterId &&
+                c.User!.Id == int.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!)
                 );
 
 
@@ -42,7 +45,7 @@ public class WeaponService : IWeaponService
             }
 
             var weaponToCreate = _mapper.Map<Weapon>(newWeapon);
-            weaponToCreate.CharacterId = int.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            //   weaponToCreate.CharacterId = int.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
             await _dataContext.Weapons.AddAsync(weaponToCreate);
             await _dataContext.SaveChangesAsync();
@@ -50,27 +53,29 @@ public class WeaponService : IWeaponService
             response.Data = _mapper.Map<GetCharacterDto>(character);
             response.Success = true;
             response.Message = $"Weapon {newWeapon.Name} saved!";
+            return response;
         }
         catch (Exception ex)
         {
             response.Success = false;
             response.Message = ex.Message;
+            return response;
         }
 
-        return response;
     }
 
-    public async Task<ServiceResponse<GetWeaponDto>> DeleteWeapon()
+    public async Task<ServiceResponse<GetWeaponDto>> DeleteWeapon(int delCharacterId)
     {
 
         var response = new ServiceResponse<GetWeaponDto>();
-
 
         try
         {
             var validCharacter = await _dataContext.Characters
                 .Include(c => c.Weapon)
-                .FirstOrDefaultAsync(c => c.User!.Id == int.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!));
+                .FirstOrDefaultAsync(
+                c => c.User!.Id == int.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!)
+                && c.Id == delCharacterId);
 
             if (validCharacter is null)
             {
@@ -79,7 +84,9 @@ public class WeaponService : IWeaponService
                 return response;
             }
 
-            var currentCharacterWeapon = await _dataContext.Weapons.FirstOrDefaultAsync(w => w.CharacterId == validCharacter.Id);
+
+
+            var currentCharacterWeapon = await _dataContext.Weapons.FirstOrDefaultAsync(w => w.CharacterId == validCharacter.Weapon!.CharacterId);
 
             if (currentCharacterWeapon is null)
             {
