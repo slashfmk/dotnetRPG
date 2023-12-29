@@ -134,11 +134,28 @@ public class CharacterService : ICharacterService
             }
 
             var skill = await _dataContext.Skills.FirstOrDefaultAsync(s => s.Id == newCharacterSkillDto.SkillId);
+            
 
             if (skill is null)
             {
                 response.Success = false;
                 response.Message = "Skill not found!";
+                return response;
+            }
+
+            /*
+             * Check if the current character is already equipped with the skill we try to assign him
+             */
+            var sKillExists = await _dataContext.Characters
+                .Where(c => c.Id == newCharacterSkillDto.CharacterId)
+                .SelectMany(c => c.Skills)
+                .AnyAsync(s => s.Id == newCharacterSkillDto.SkillId);
+
+
+            if (sKillExists)
+            {
+                response.Success = false;
+                response.Message = "Character already equipped with this skill";
                 return response;
             }
 
