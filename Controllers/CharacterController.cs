@@ -45,4 +45,13 @@ public class CharacterController : BaseApiController
     {
         return Ok(await _characterService.AddCharacter(newAddCharacter));
     }
+
+    [HttpPost("AddSkill")]
+    public async Task<ActionResult<GetCharacterDto>> AddSkill(AddCharacterSkillDto addCharacterSkillDto)
+    {
+        var result = await _characterService.AddCharacterSkill(addCharacterSkillDto);
+
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
+    }
 }

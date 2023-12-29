@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Connection to the DB
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DirectConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 
@@ -59,8 +59,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     }
     );
 
-
-
 /*
  * End 
  */
@@ -72,7 +70,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.UseSwagger(); 
     app.UseSwaggerUI();
 }
 

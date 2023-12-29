@@ -14,6 +14,6 @@ public class GetCharacterDto
     public int Intelligence { get; set; }
     public RpgClass Class { get; set; }
     public GetWeaponDto? Weapon { get; set; }
-    public GetSkillDto? Skill { get; set; }
+    public List<GetSkillDto>? Skills { get; set; }
 
 }
